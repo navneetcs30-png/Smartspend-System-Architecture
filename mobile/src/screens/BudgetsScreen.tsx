@@ -5,13 +5,13 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { THEME } from '../constants/theme';
 import { api } from '../services/api';
 import { BudgetProgress } from '../types';
 import { formatINR } from '../utils/formatters';
+import { ProgressBar, Badge } from '../components';
 import { PieChart, AlertTriangle, CheckCircle2, TrendingUp, AlertOctagon } from 'lucide-react-native';
 
 export const BudgetsScreen: React.FC = () => {
@@ -75,6 +75,8 @@ export const BudgetsScreen: React.FC = () => {
             ? THEME.colors.warning
             : THEME.colors.primary;
 
+          const badgeVariant = isExceeded ? 'danger' : isWarning ? 'warning' : 'success';
+
           return (
             <View key={b.id} style={styles.budgetCard}>
               <View style={styles.cardTopRow}>
@@ -83,45 +85,28 @@ export const BudgetsScreen: React.FC = () => {
                   <Text style={styles.limitText}>Limit: {formatINR(b.budget_limit_inr)} / month</Text>
                 </View>
 
-                <View
-                  style={[
-                    styles.statusBadge,
-                    {
-                      backgroundColor: isExceeded
-                        ? THEME.colors.expenseBg
-                        : isWarning
-                        ? THEME.colors.warningBg
-                        : THEME.colors.primaryGlow,
-                      borderColor: statusColor,
-                    },
-                  ]}
-                >
-                  {isExceeded ? (
-                    <AlertOctagon size={12} color={THEME.colors.expense} />
-                  ) : isWarning ? (
-                    <AlertTriangle size={12} color={THEME.colors.warning} />
-                  ) : (
-                    <CheckCircle2 size={12} color={THEME.colors.primary} />
-                  )}
-                  <Text style={[styles.statusBadgeText, { color: statusColor }]}>
-                    {b.status}
-                  </Text>
-                </View>
+                <Badge
+                  label={b.status}
+                  variant={badgeVariant}
+                  icon={
+                    isExceeded ? (
+                      <AlertOctagon size={12} color={THEME.colors.expense} />
+                    ) : isWarning ? (
+                      <AlertTriangle size={12} color={THEME.colors.warning} />
+                    ) : (
+                      <CheckCircle2 size={12} color={THEME.colors.primary} />
+                    )
+                  }
+                />
               </View>
 
-              {/* Progress Bar */}
+              {/* Progress Bar Component */}
               <View style={styles.progressContainer}>
-                <View style={styles.progressBarTrack}>
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      {
-                        width: `${Math.min(100, b.percentage_used)}%`,
-                        backgroundColor: statusColor,
-                      },
-                    ]}
-                  />
-                </View>
+                <ProgressBar
+                  percentage={b.percentage_used}
+                  color={statusColor}
+                  height={8}
+                />
                 <View style={styles.progressLabels}>
                   <Text style={styles.spentText}>
                     Spent: <Text style={{ color: THEME.colors.textPrimary, fontWeight: '700' }}>{formatINR(b.spent_inr)}</Text>
@@ -221,37 +206,14 @@ const styles = StyleSheet.create({
     color: THEME.colors.textMuted,
     marginTop: 2,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: THEME.borderRadius.full,
-    borderWidth: 1,
-  },
-  statusBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-  },
   progressContainer: {
     marginBottom: THEME.spacing.sm,
-  },
-  progressBarTrack: {
-    height: 8,
-    backgroundColor: THEME.colors.cardElevated,
-    borderRadius: 999,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 999,
   },
   progressLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 6,
   },
   spentText: {
     fontSize: 11,

@@ -12,7 +12,8 @@ import { THEME } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { DashboardSummary, Transaction, CategorySpendItem } from '../types';
-import { formatINR, formatPercent, formatDate } from '../utils/formatters';
+import { formatINR, formatPercent } from '../utils/formatters';
+import { KPICard, TransactionItem, ProgressBar } from '../components';
 import {
   TrendingUp,
   TrendingDown,
@@ -25,8 +26,6 @@ import {
   Sparkles,
   Plus,
   ShieldCheck,
-  ArrowUpRight,
-  ArrowDownLeft,
 } from 'lucide-react-native';
 
 interface DashboardScreenProps {
@@ -115,104 +114,68 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         </View>
       </View>
 
-      {/* 8 Primary Financial KPI Cards */}
+      {/* 8 Primary Financial KPI Cards using modular KPICard component */}
       <Text style={styles.sectionHeader}>Key Financial Metrics</Text>
       <View style={styles.kpiGrid}>
-        {/* Total Income */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Total Income</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.incomeBg }]}>
-              <TrendingUp size={14} color={THEME.colors.income} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{formatINR(data?.total_income_inr)}</Text>
-          <Text style={[styles.kpiSub, { color: THEME.colors.income }]}>Deposits</Text>
-        </View>
-
-        {/* Total Expenses */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Total Expenses</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.expenseBg }]}>
-              <TrendingDown size={14} color={THEME.colors.expense} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{formatINR(data?.total_expenses_inr)}</Text>
-          <Text style={[styles.kpiSub, { color: THEME.colors.expense }]}>Total Outflows</Text>
-        </View>
-
-        {/* Net Savings */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Net Savings</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.primaryGlow }]}>
-              <PiggyBank size={14} color={THEME.colors.primary} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{formatINR(data?.net_savings_inr)}</Text>
-          <Text style={[styles.kpiSub, { color: THEME.colors.primary }]}>Retained Capital</Text>
-        </View>
-
-        {/* Savings Rate */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Savings Rate</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.indigoBg }]}>
-              <Percent size={14} color={THEME.colors.indigo} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{formatPercent(data?.savings_rate_percent)}</Text>
-          <Text style={styles.kpiSub}>Of Total Income</Text>
-        </View>
-
-        {/* Active Budgets */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Budgets</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.warningBg }]}>
-              <PieIcon size={14} color={THEME.colors.warning} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{data?.active_budgets_count || 0}</Text>
-          <Text style={styles.kpiSub}>Active Limits</Text>
-        </View>
-
-        {/* Savings Goals */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Savings Goals</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.purpleBg }]}>
-              <Target size={14} color={THEME.colors.purple} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{data?.active_goals_count || 0}</Text>
-          <Text style={styles.kpiSub}>Targets Active</Text>
-        </View>
-
-        {/* Daily Velocity */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Daily Burn</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: 'rgba(249, 115, 22, 0.12)' }]}>
-              <Flame size={14} color="#F97316" />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{formatINR(data?.avg_daily_spending_inr)}</Text>
-          <Text style={styles.kpiSub}>Avg Daily Spend</Text>
-        </View>
-
-        {/* Projected EOM */}
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiTopRow}>
-            <Text style={styles.kpiLabel}>Projected EOM</Text>
-            <View style={[styles.kpiIconBox, { backgroundColor: THEME.colors.indigoBg }]}>
-              <Calendar size={14} color={THEME.colors.indigo} />
-            </View>
-          </View>
-          <Text style={styles.kpiValue}>{formatINR(data?.projected_month_end_inr)}</Text>
-          <Text style={styles.kpiSub}>Estimated Total</Text>
-        </View>
+        <KPICard
+          label="Total Income"
+          value={formatINR(data?.total_income_inr)}
+          subtext="Deposits"
+          subtextColor={THEME.colors.income}
+          icon={<TrendingUp size={14} color={THEME.colors.income} />}
+          iconBgColor={THEME.colors.incomeBg}
+        />
+        <KPICard
+          label="Total Expenses"
+          value={formatINR(data?.total_expenses_inr)}
+          subtext="Total Outflows"
+          subtextColor={THEME.colors.expense}
+          icon={<TrendingDown size={14} color={THEME.colors.expense} />}
+          iconBgColor={THEME.colors.expenseBg}
+        />
+        <KPICard
+          label="Net Savings"
+          value={formatINR(data?.net_savings_inr)}
+          subtext="Retained Capital"
+          subtextColor={THEME.colors.primary}
+          icon={<PiggyBank size={14} color={THEME.colors.primary} />}
+          iconBgColor={THEME.colors.primaryGlow}
+        />
+        <KPICard
+          label="Savings Rate"
+          value={formatPercent(data?.savings_rate_percent)}
+          subtext="Of Total Income"
+          icon={<Percent size={14} color={THEME.colors.indigo} />}
+          iconBgColor={THEME.colors.indigoBg}
+        />
+        <KPICard
+          label="Budgets"
+          value={String(data?.active_budgets_count || 0)}
+          subtext="Active Limits"
+          icon={<PieIcon size={14} color={THEME.colors.warning} />}
+          iconBgColor={THEME.colors.warningBg}
+        />
+        <KPICard
+          label="Savings Goals"
+          value={String(data?.active_goals_count || 0)}
+          subtext="Targets Active"
+          icon={<Target size={14} color={THEME.colors.purple} />}
+          iconBgColor={THEME.colors.purpleBg}
+        />
+        <KPICard
+          label="Daily Burn"
+          value={formatINR(data?.avg_daily_spending_inr)}
+          subtext="Avg Daily Spend"
+          icon={<Flame size={14} color="#F97316" />}
+          iconBgColor="rgba(249, 115, 22, 0.12)"
+        />
+        <KPICard
+          label="Projected EOM"
+          value={formatINR(data?.projected_month_end_inr)}
+          subtext="Estimated Total"
+          icon={<Calendar size={14} color={THEME.colors.indigo} />}
+          iconBgColor={THEME.colors.indigoBg}
+        />
       </View>
 
       {/* Top Categories Spending */}
@@ -233,23 +196,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   {formatINR(c.total_inr)} ({c.percentage}%)
                 </Text>
               </View>
-              <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${Math.min(100, c.percentage)}%`,
-                      backgroundColor: COLORS[i % COLORS.length],
-                    },
-                  ]}
-                />
-              </View>
+              <ProgressBar
+                percentage={c.percentage}
+                color={COLORS[i % COLORS.length]}
+                height={6}
+              />
             </View>
           ))}
         </View>
       )}
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions using modular TransactionItem component */}
       <View style={styles.cardContainer}>
         <View style={styles.cardHeaderRow}>
           <Text style={styles.cardTitle}>Recent Ledger Transactions</Text>
@@ -261,56 +218,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
         {recentTxns.length === 0 ? (
           <Text style={styles.emptyText}>No transactions recorded yet.</Text>
         ) : (
-          recentTxns.map((txn) => {
-            const isExpense = txn.transaction_type === 'EXPENSE';
-            const isIncome = txn.transaction_type === 'INCOME';
-            return (
-              <View key={txn.id} style={styles.txnItem}>
-                <View style={styles.txnLeft}>
-                  <View
-                    style={[
-                      styles.txnIconBox,
-                      {
-                        backgroundColor: isIncome
-                          ? THEME.colors.incomeBg
-                          : isExpense
-                          ? THEME.colors.expenseBg
-                          : THEME.colors.transferBg,
-                      },
-                    ]}
-                  >
-                    {isIncome ? (
-                      <ArrowDownLeft size={16} color={THEME.colors.income} />
-                    ) : (
-                      <ArrowUpRight size={16} color={isExpense ? THEME.colors.expense : THEME.colors.transfer} />
-                    )}
-                  </View>
-                  <View style={styles.txnDetails}>
-                    <Text style={styles.txnDescription} numberOfLines={1}>
-                      {txn.description}
-                    </Text>
-                    <Text style={styles.txnMeta}>
-                      {formatDate(txn.transaction_date)} • {txn.payment_method}
-                    </Text>
-                  </View>
-                </View>
-                <Text
-                  style={[
-                    styles.txnAmount,
-                    {
-                      color: isIncome
-                        ? THEME.colors.income
-                        : isExpense
-                        ? THEME.colors.textPrimary
-                        : THEME.colors.transfer,
-                    },
-                  ]}
-                >
-                  {isIncome ? '+' : '-'}{formatINR(txn.amount_inr)}
-                </Text>
-              </View>
-            );
-          })
+          recentTxns.map((txn) => (
+            <TransactionItem
+              key={txn.id}
+              transaction={txn}
+              onPress={() => onNavigateTab('transactions')}
+            />
+          ))
         )}
       </View>
     </ScrollView>
@@ -424,43 +338,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: THEME.spacing.lg,
   },
-  kpiCard: {
-    width: '48.5%',
-    backgroundColor: THEME.colors.card,
-    borderColor: THEME.colors.border,
-    borderWidth: 1,
-    borderRadius: THEME.borderRadius.lg,
-    padding: THEME.spacing.md,
-  },
-  kpiTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  kpiLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: THEME.colors.textSecondary,
-  },
-  kpiIconBox: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  kpiValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: THEME.colors.textPrimary,
-  },
-  kpiSub: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: THEME.colors.textMuted,
-    marginTop: 2,
-  },
   cardContainer: {
     backgroundColor: THEME.colors.card,
     borderColor: THEME.colors.border,
@@ -507,59 +384,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: THEME.colors.textPrimary,
   },
-  progressBarTrack: {
-    height: 6,
-    backgroundColor: THEME.colors.cardElevated,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 999,
-  },
   emptyText: {
     fontSize: 12,
     color: THEME.colors.textMuted,
     textAlign: 'center',
     paddingVertical: THEME.spacing.lg,
-  },
-  txnItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: THEME.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
-  },
-  txnLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  txnIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  txnDetails: {
-    flex: 1,
-  },
-  txnDescription: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: THEME.colors.textPrimary,
-  },
-  txnMeta: {
-    fontSize: 10,
-    color: THEME.colors.textMuted,
-    marginTop: 2,
-  },
-  txnAmount: {
-    fontSize: 13,
-    fontWeight: '800',
-    marginLeft: 8,
   },
 });

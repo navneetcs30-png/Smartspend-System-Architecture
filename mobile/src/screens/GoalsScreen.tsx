@@ -14,6 +14,7 @@ import { THEME } from '../constants/theme';
 import { api } from '../services/api';
 import { SavingsGoal } from '../types';
 import { formatINR, formatDate } from '../utils/formatters';
+import { ProgressBar, Badge } from '../components';
 import { Target, Calendar, Plus, CheckCircle, X } from 'lucide-react-native';
 
 export const GoalsScreen: React.FC = () => {
@@ -111,10 +112,11 @@ export const GoalsScreen: React.FC = () => {
                 </View>
 
                 {isCompleted ? (
-                  <View style={styles.completedBadge}>
-                    <CheckCircle size={12} color={THEME.colors.primary} />
-                    <Text style={styles.completedBadgeText}>Completed</Text>
-                  </View>
+                  <Badge
+                    label="Completed"
+                    variant="success"
+                    icon={<CheckCircle size={12} color={THEME.colors.primary} />}
+                  />
                 ) : (
                   <TouchableOpacity
                     style={styles.depositButton}
@@ -130,19 +132,13 @@ export const GoalsScreen: React.FC = () => {
                 )}
               </View>
 
-              {/* Progress Bar */}
+              {/* Progress Bar Component */}
               <View style={styles.progressContainer}>
-                <View style={styles.progressBarTrack}>
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      {
-                        width: `${Math.min(100, goal.percentage_achieved)}%`,
-                        backgroundColor: THEME.colors.purple,
-                      },
-                    ]}
-                  />
-                </View>
+                <ProgressBar
+                  percentage={goal.percentage_achieved}
+                  color={THEME.colors.purple}
+                  height={8}
+                />
                 <View style={styles.progressLabels}>
                   <Text style={styles.savedText}>
                     Saved: <Text style={{ color: THEME.colors.textPrimary, fontWeight: '700' }}>{formatINR(goal.current_saved_inr)}</Text> of {formatINR(goal.target_amount_inr)}
@@ -295,40 +291,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#070A11',
   },
-  completedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: THEME.colors.primaryGlow,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: THEME.borderRadius.sm,
-    borderColor: THEME.colors.primary,
-    borderWidth: 1,
-  },
-  completedBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: THEME.colors.primaryLight,
-  },
   progressContainer: {
     marginBottom: THEME.spacing.sm,
-  },
-  progressBarTrack: {
-    height: 8,
-    backgroundColor: THEME.colors.cardElevated,
-    borderRadius: 999,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 999,
   },
   progressLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 6,
   },
   savedText: {
     fontSize: 11,
