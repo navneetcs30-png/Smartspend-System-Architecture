@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased min-h-screen selection:bg-emerald-500 selection:text-white transition-colors duration-200;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Ambient dark mode background lighting */
+  .dark body {
+    background-color: #070A11;
+    background-image: 
+      radial-gradient(ellipse 90% 45% at 50% -10%, rgba(16, 185, 129, 0.05), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 85% 15%, rgba(99, 102, 241, 0.035), transparent 60%),
+      radial-gradient(ellipse 50% 30% at 15% 40%, rgba(6, 182, 212, 0.025), transparent 60%);
+    background-attachment: fixed;
+  }
+}
+
+/* Classic Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass {
+  background: rgba(13, 19, 31, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Classic Dark Card Styling with Bevel Highlight & Depth */
+.dark .dark\:bg-slate-900 {
+  background-color: #0D131F !important;
+  border-color: rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 
+    0 4px 20px -2px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.dark .dark\:bg-slate-900:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Subtle table rows in dark mode */
+.dark tr.border-b {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Sleek input wells in dark mode */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #121A2B !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  color: #F8FAFC !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
