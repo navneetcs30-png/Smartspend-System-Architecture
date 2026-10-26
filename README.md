@@ -84,6 +84,21 @@ npx expo start
 ```
 Metro Bundler running on **[http://localhost:8081](http://localhost:8081)**. Scan the QR code using Expo Go or press `a` for Android Emulator / `w` for Web preview.
 
+### 5. Standalone Android APK (.apk)
+The production-ready debug APK has been assembled and is located at:
+- **Root Directory:** `d:\BANK\SmartSpend-AI.apk`
+- **Native Build Path:** `mobile/android/app/build/outputs/apk/debug/app-debug.apk`
+
+To assemble a new APK directly using the native Gradle toolchain:
+```bash
+cd mobile/android
+.\gradlew.bat --project-cache-dir C:\Users\Navneet\.gradle\caches\bank-mobile-cache assembleDebug
+```
+To install directly to a connected Android phone or emulator via ADB:
+```bash
+adb install -r d:\BANK\SmartSpend-AI.apk
+```
+
 ---
 
 ## 🔑 Demo Account Credentials
