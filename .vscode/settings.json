@@ -1,0 +1,16 @@
+{
+  "typescript.tsdk": "mobile/node_modules/typescript/lib",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.paths": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "mobile/android/.gradle": true,
+    "mobile/android/app/build": true,
+    "backend/venv": true
+  }
+}

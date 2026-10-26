@@ -28,25 +28,26 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   onSuccess,
 }) => {
   const [txnType, setTxnType] = useState<'EXPENSE' | 'INCOME' | 'TRANSFER'>('EXPENSE');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [merchant, setMerchant] = useState('');
+  const [amount, setAmount] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [merchant, setMerchant] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'NETBANKING' | 'DEBIT_CARD' | 'CREDIT_CARD' | 'CASH'>('UPI');
-  const [paymentSource, setPaymentSource] = useState('PhonePe / Paytm');
-  const [categoryId, setCategoryId] = useState('');
-  const [accountId, setAccountId] = useState('');
-  const [destinationAccountId, setDestinationAccountId] = useState('');
-  const [referenceUtr, setReferenceUtr] = useState('');
-  const [notes, setNotes] = useState('');
+  const [paymentSource, setPaymentSource] = useState<string>('PhonePe / Paytm');
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [accountId, setAccountId] = useState<string>('');
+  const [destinationAccountId, setDestinationAccountId] = useState<string>('');
+  const [referenceUtr, setReferenceUtr] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
       loadDependencies();
+      setError(null);
     }
   }, [visible]);
 
@@ -92,9 +93,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         transaction_date: new Date().toISOString(),
         description: description.trim(),
         merchant_name: merchant.trim() || undefined,
-        category_id: categoryId || undefined,
+        category_id: txnType !== 'TRANSFER' ? (categoryId || undefined) : undefined,
         account_id: accountId || undefined,
-        destination_account_id: txnType === 'TRANSFER' ? destinationAccountId : undefined,
+        destination_account_id: txnType === 'TRANSFER' ? (destinationAccountId || undefined) : undefined,
         payment_method: paymentMethod,
         payment_source: paymentSource,
         reference_utr: referenceUtr.trim() || undefined,
@@ -144,17 +145,20 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           <ScrollView style={styles.scrollBody} keyboardShouldPersistTaps="handled">
             {/* Transaction Type Segment */}
             <View style={styles.typeSegment}>
-              {(['EXPENSE', 'INCOME', 'TRANSFER'] as const).map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[styles.typeButton, txnType === type && styles.typeButtonActive]}
-                  onPress={() => setTxnType(type)}
-                >
-                  <Text style={[styles.typeButtonText, txnType === type && styles.typeButtonTextActive]}>
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {(['EXPENSE', 'INCOME', 'TRANSFER'] as const).map((type) => {
+                const isActive = txnType === type;
+                return (
+                  <TouchableOpacity
+                    key={type}
+                    style={[styles.typeButton, isActive ? styles.typeButtonActive : null]}
+                    onPress={() => setTxnType(type)}
+                  >
+                    <Text style={[styles.typeButtonText, isActive ? styles.typeButtonTextActive : null]}>
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
             {/* Amount Input */}
@@ -192,21 +196,74 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             />
 
             {/* Category Selector */}
-            {txnType !== 'TRANSFER' && (
+            {txnType !== 'TRANSFER' && categories.length > 0 && (
               <>
                 <Text style={styles.label}>Category</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
-                  {categories.map((c) => (
-                    <TouchableOpacity
-                      key={c.id}
-                      style={[styles.chip, categoryId === c.id && styles.chipActive]}
-                      onPress={() => setCategoryId(c.id)}
-                    >
-                      <Text style={[styles.chipText, categoryId === c.id && styles.chipTextActive]}>
-                        {c.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {categories.map((c) => {
+                    const isCatActive = categoryId === c.id;
+                    return (
+                      <TouchableOpacity
+                        key={c.id}
+                        style={[styles.chip, isCatActive ? styles.chipActive : null]}
+                        onPress={() => setCategoryId(c.id)}
+                      >
+                        <Text style={[styles.chipText, isCatActive ? styles.chipTextActive : null]}>
+                          {c.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </>
+            )}
+
+            {/* Account Selector */}
+            {accounts.length > 0 && (
+              <>
+                <Text style={styles.label}>
+                  {txnType === 'TRANSFER' ? 'From Account' : 'Account'}
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
+                  {accounts.map((acc) => {
+                    const isAccActive = accountId === acc.id;
+                    return (
+                      <TouchableOpacity
+                        key={acc.id}
+                        style={[styles.chip, isAccActive ? styles.chipActive : null]}
+                        onPress={() => setAccountId(acc.id)}
+                      >
+                        <Text style={[styles.chipText, isAccActive ? styles.chipTextActive : null]}>
+                          {acc.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </>
+            )}
+
+            {/* Destination Account for Transfers */}
+            {txnType === 'TRANSFER' && accounts.length > 1 && (
+              <>
+                <Text style={styles.label}>To Destination Account</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
+                  {accounts
+                    .filter((acc) => acc.id !== accountId)
+                    .map((acc) => {
+                      const isDestActive = destinationAccountId === acc.id;
+                      return (
+                        <TouchableOpacity
+                          key={acc.id}
+                          style={[styles.chip, isDestActive ? styles.chipActive : null]}
+                          onPress={() => setDestinationAccountId(acc.id)}
+                        >
+                          <Text style={[styles.chipText, isDestActive ? styles.chipTextActive : null]}>
+                            {acc.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                 </ScrollView>
               </>
             )}
@@ -214,17 +271,20 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             {/* Payment Method */}
             <Text style={styles.label}>Payment Method</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
-              {(['UPI', 'NETBANKING', 'DEBIT_CARD', 'CREDIT_CARD', 'CASH'] as const).map((method) => (
-                <TouchableOpacity
-                  key={method}
-                  style={[styles.chip, paymentMethod === method && styles.chipActive]}
-                  onPress={() => setPaymentMethod(method)}
-                >
-                  <Text style={[styles.chipText, paymentMethod === method && styles.chipTextActive]}>
-                    {method}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {(['UPI', 'NETBANKING', 'DEBIT_CARD', 'CREDIT_CARD', 'CASH'] as const).map((method) => {
+                const isMethodActive = paymentMethod === method;
+                return (
+                  <TouchableOpacity
+                    key={method}
+                    style={[styles.chip, isMethodActive ? styles.chipActive : null]}
+                    onPress={() => setPaymentMethod(method)}
+                  >
+                    <Text style={[styles.chipText, isMethodActive ? styles.chipTextActive : null]}>
+                      {method}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
 
             {/* Reference / UTR */}
@@ -240,7 +300,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             {/* Notes */}
             <Text style={styles.label}>Notes (Optional)</Text>
             <TextInput
-              style={[styles.input, { height: 60, textAlignVertical: 'top' }]}
+              style={[styles.input, styles.notesInput]}
               placeholder="Additional transaction context..."
               placeholderTextColor={THEME.colors.textMuted}
               value={notes}
@@ -386,6 +446,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: THEME.spacing.md,
     fontSize: 13,
     color: THEME.colors.textPrimary,
+  },
+  notesInput: {
+    height: 60,
+    textAlignVertical: 'top',
   },
   chipsScroll: {
     flexDirection: 'row',

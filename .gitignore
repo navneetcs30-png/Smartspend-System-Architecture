@@ -42,6 +42,7 @@ mobile/android/local.properties
 
 # IDE & OS Metadata
 .vscode/
+!.vscode/settings.json
 .idea/
 .DS_Store
 Thumbs.db

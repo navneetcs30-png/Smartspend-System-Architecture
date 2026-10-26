@@ -12,7 +12,8 @@ if sys.platform == "win32":
 from datetime import datetime, timezone, date, timedelta
 from httpx import AsyncClient, ASGITransport
 from app.main import app
-from app.core.database import AsyncSessionLocal, init_db, engine, Base
+from app.core.database import AsyncSessionLocal, engine, Base
+from app.core.init_db import init_db
 from app.services.ledger_service import inr_to_paise, paise_to_inr, compute_deduplication_hash
 from app.models.user import User
 
