@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { THEME } from '../constants/theme';
-import { Wallet, Sparkles, Lock, Mail, User as UserIcon, Phone, AlertCircle } from 'lucide-react-native';
+import { getApiUrl, setCustomApiUrl } from '../services/api';
+import {
+  Wallet,
+  Sparkles,
+  Lock,
+  Mail,
+  User as UserIcon,
+  Phone,
+  AlertCircle,
+  Server,
+  X,
+  Check,
+  Globe,
+} from 'lucide-react-native';
 
 export const AuthScreen: React.FC = () => {
   const { login, register } = useAuth();
@@ -23,6 +37,33 @@ export const AuthScreen: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Server Host Config State
+  const [serverModalVisible, setServerModalVisible] = useState(false);
+  const [currentApiUrl, setCurrentApiUrl] = useState('');
+  const [inputApiUrl, setInputApiUrl] = useState('');
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    getApiUrl().then((url) => {
+      setCurrentApiUrl(url);
+      setInputApiUrl(url);
+    });
+  }, []);
+
+  const handleSaveApiUrl = async (urlToSave?: string) => {
+    const target = (urlToSave || inputApiUrl).trim();
+    if (!target) return;
+    await setCustomApiUrl(target);
+    const updated = await getApiUrl();
+    setCurrentApiUrl(updated);
+    setInputApiUrl(updated);
+    setSavedSuccess(true);
+    setTimeout(() => {
+      setSavedSuccess(false);
+      setServerModalVisible(false);
+    }, 800);
+  };
 
   const handleSubmit = async () => {
     if (!email.trim() || !password.trim()) {
@@ -43,7 +84,7 @@ export const AuthScreen: React.FC = () => {
         await login(email.trim(), password);
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Authentication failed. Please verify credentials.');
+      setError(err.response?.data?.detail || 'Authentication failed. Please verify credentials or server connection.');
     } finally {
       setLoading(false);
     }
@@ -55,7 +96,7 @@ export const AuthScreen: React.FC = () => {
     try {
       await login('demo@smartspend.ai', 'Password123!');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Demo login failed.');
+      setError(err.response?.data?.detail || 'Demo login failed. Please check backend server status.');
     } finally {
       setLoading(false);
     }
@@ -206,7 +247,94 @@ export const AuthScreen: React.FC = () => {
         <Text style={styles.securityNote}>
           🔒 Zero UPI PIN / Bank credential storage • DPDP Act 2023 compliant
         </Text>
+
+        {/* Server Connection Config Chip */}
+        <TouchableOpacity
+          style={styles.serverChip}
+          onPress={() => setServerModalVisible(true)}
+          activeOpacity={0.7}
+        >
+          <Server size={12} color={THEME.colors.textMuted} />
+          <Text style={styles.serverChipText} numberOfLines={1}>
+            API Host: {currentApiUrl || 'Default'} (Tap to configure)
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
+
+      {/* Server URL Configuration Modal */}
+      <Modal visible={serverModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalTitleRow}>
+                <Globe size={18} color={THEME.colors.primary} />
+                <Text style={styles.modalTitle}>Backend Server Connection</Text>
+              </View>
+              <TouchableOpacity onPress={() => setServerModalVisible(false)}>
+                <X size={20} color={THEME.colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalDescription}>
+              Select or enter the FastAPI backend server URL for your device environment:
+            </Text>
+
+            {/* Quick Presets */}
+            <View style={styles.presetsContainer}>
+              <TouchableOpacity
+                style={styles.presetButton}
+                onPress={() => handleSaveApiUrl('http://10.0.2.2:8000/api/v1')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.presetTitle}>Android Emulator</Text>
+                <Text style={styles.presetUrl}>http://10.0.2.2:8000/api/v1</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.presetButton}
+                onPress={() => handleSaveApiUrl('http://192.168.1.16:8000/api/v1')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.presetTitle}>Physical Phone (Wi-Fi LAN)</Text>
+                <Text style={styles.presetUrl}>http://192.168.1.16:8000/api/v1</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.presetButton}
+                onPress={() => handleSaveApiUrl('http://127.0.0.1:8000/api/v1')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.presetTitle}>Localhost (Web / iOS)</Text>
+                <Text style={styles.presetUrl}>http://127.0.0.1:8000/api/v1</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Custom Input */}
+            <Text style={styles.customLabel}>Custom Server URL</Text>
+            <View style={styles.customInputRow}>
+              <TextInput
+                style={styles.customInput}
+                placeholder="http://192.168.1.16:8000/api/v1"
+                placeholderTextColor={THEME.colors.textMuted}
+                value={inputApiUrl}
+                onChangeText={setInputApiUrl}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                style={styles.saveUrlButton}
+                onPress={() => handleSaveApiUrl()}
+                activeOpacity={0.8}
+              >
+                {savedSuccess ? (
+                  <Check size={16} color="#070A11" />
+                ) : (
+                  <Text style={styles.saveUrlButtonText}>Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -379,5 +507,118 @@ const styles = StyleSheet.create({
     color: THEME.colors.textMuted,
     textAlign: 'center',
     marginTop: THEME.spacing.xl,
+  },
+  serverChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderColor: THEME.colors.border,
+    borderWidth: 1,
+    borderRadius: THEME.borderRadius.full,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginTop: THEME.spacing.md,
+    alignSelf: 'center',
+  },
+  serverChipText: {
+    fontSize: 10,
+    color: THEME.colors.textMuted,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(7, 10, 17, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: THEME.spacing.lg,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: THEME.colors.card,
+    borderColor: THEME.colors.border,
+    borderWidth: 1,
+    borderRadius: THEME.borderRadius.xl,
+    padding: THEME.spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: THEME.spacing.sm,
+  },
+  modalTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  modalTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: THEME.colors.textPrimary,
+  },
+  modalDescription: {
+    fontSize: 11,
+    color: THEME.colors.textSecondary,
+    marginBottom: THEME.spacing.md,
+    lineHeight: 16,
+  },
+  presetsContainer: {
+    gap: 8,
+    marginBottom: THEME.spacing.md,
+  },
+  presetButton: {
+    backgroundColor: THEME.colors.cardElevated,
+    borderColor: THEME.colors.border,
+    borderWidth: 1,
+    borderRadius: THEME.borderRadius.md,
+    padding: THEME.spacing.sm,
+  },
+  presetTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: THEME.colors.primaryLight,
+  },
+  presetUrl: {
+    fontSize: 10,
+    color: THEME.colors.textMuted,
+    marginTop: 2,
+  },
+  customLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: THEME.colors.textSecondary,
+    marginBottom: 4,
+  },
+  customInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  customInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: THEME.colors.cardElevated,
+    borderColor: THEME.colors.border,
+    borderWidth: 1,
+    borderRadius: THEME.borderRadius.md,
+    paddingHorizontal: THEME.spacing.md,
+    fontSize: 11,
+    color: THEME.colors.textPrimary,
+  },
+  saveUrlButton: {
+    height: 40,
+    paddingHorizontal: 16,
+    backgroundColor: THEME.colors.primary,
+    borderRadius: THEME.borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveUrlButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#070A11',
   },
 });
