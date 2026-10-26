@@ -23,13 +23,15 @@
 
 ```mermaid
 graph TD
-    Client["React 18 + Vite + Tailwind Frontend (Port 5173)"]
+    WebClient["React 18 + Vite Web App (Port 5173)"]
+    MobileClient["React Native + Expo Mobile App (Port 8081)"]
     API["FastAPI REST Backend (Port 8000)"]
     DB[(SQLite / PostgreSQL Ledger in Exact Paise)]
     AI["AI Spending Analyst (Deterministic Tool Engine)"]
     Parser["Statement Parser (Paytm / PhonePe CSV & Excel)"]
 
-    Client -->|JWT Bearer REST| API
+    WebClient -->|JWT Bearer REST| API
+    MobileClient -->|AsyncStorage JWT REST| API
     API -->|Async SQLAlchemy 2.0| DB
     API -->|Analytical Aggregations| AI
     API -->|Deduplication & Auto-Categorization| Parser
@@ -38,7 +40,8 @@ graph TD
 ### Core Technology Stack
 
 - **Backend:** Python 3.14, FastAPI, SQLAlchemy 2.0 (Async), SQLite/PostgreSQL, Pydantic v2, Python-Jose (JWT), Bcrypt, OpenPyXL.
-- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Recharts, Lucide Icons, Axios.
+- **Web Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Recharts, Lucide Icons, Axios.
+- **Mobile Application:** React Native, Expo SDK 52, TypeScript, Safe Area Context, Async-Storage, Lucide React Native, Axios.
 - **Security:** Multi-tenant row-level tenant isolation, SHA-256 idempotency hashing, Bcrypt password hashing.
 
 ---
@@ -48,6 +51,7 @@ graph TD
 ### 1. Prerequisites
 - **Python 3.11+** installed
 - **Node.js 20+** installed
+- *(Optional for Mobile)*: Expo Go on your Android/iOS device or Android Studio emulator
 
 ### 2. Backend Setup
 ```bash
@@ -62,14 +66,23 @@ pip install -r requirements.txt
 python seed_demo_data.py
 uvicorn app.main:app --port 8000 --reload
 ```
+API running at **[http://127.0.0.1:8000](http://127.0.0.1:8000)** (Docs at `http://127.0.0.1:8000/docs`).
 
-### 3. Frontend Setup
+### 3. Web Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)** in your browser.
+
+### 4. Mobile Application Setup
+```bash
+cd mobile
+npm install
+npx expo start
+```
+Metro Bundler running on **[http://localhost:8081](http://localhost:8081)**. Scan the QR code using Expo Go or press `a` for Android Emulator / `w` for Web preview.
 
 ---
 

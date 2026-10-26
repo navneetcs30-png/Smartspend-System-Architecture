@@ -16,11 +16,14 @@ backend/smartspend.db
 .env
 .env.*
 
-# Node.js & Frontend Build Artifacts
+# Node.js & Frontend/Mobile Build Artifacts
 node_modules/
 frontend/node_modules/
+mobile/node_modules/
 dist/
 frontend/dist/
+.expo/
+mobile/.expo/
 .tmp/
 *.tsbuildinfo
 npm-debug.log*
